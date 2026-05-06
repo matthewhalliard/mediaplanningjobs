@@ -4,7 +4,7 @@ import sitemap from "@astrojs/sitemap";
 import tailwind from "@astrojs/tailwind";
 
 export default defineConfig({
-  site: "https://mediaplanningjobs.io",
+  site: "https://getmediaplanningjobs.com",
   integrations: [mdx(), sitemap(), tailwind()],
   build: {
     format: "directory",
