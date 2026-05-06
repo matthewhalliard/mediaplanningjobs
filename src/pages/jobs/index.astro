@@ -1,0 +1,80 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import JobCard from "../../components/JobCard.astro";
+
+const jobs = (await getCollection("jobs"))
+  .sort((a, b) => b.data.postedAt.getTime() - a.data.postedAt.getTime());
+---
+<BaseLayout
+  title={`All ${jobs.length} Media Planning Jobs`}
+  description="Every media planning, buying, ad ops, and programmatic role on Media Planning Jobs."
+>
+  <section class="mx-auto max-w-6xl px-6 py-12">
+    <h1 class="text-3xl font-semibold text-ink-900">All jobs</h1>
+    <p class="mt-2 text-ink-600">{jobs.length} open roles across the discipline.</p>
+
+    <div id="filters" class="mt-6 flex flex-wrap gap-2 text-sm">
+      <button data-filter="function" data-value="all" class="filter-btn active rounded-md border border-ink-200 bg-white px-3 py-1.5">All</button>
+      <button data-filter="function" data-value="planning" class="filter-btn rounded-md border border-ink-200 bg-white px-3 py-1.5">Planning</button>
+      <button data-filter="function" data-value="buying" class="filter-btn rounded-md border border-ink-200 bg-white px-3 py-1.5">Buying</button>
+      <button data-filter="function" data-value="ad-ops" class="filter-btn rounded-md border border-ink-200 bg-white px-3 py-1.5">Ad Ops</button>
+      <button data-filter="function" data-value="programmatic" class="filter-btn rounded-md border border-ink-200 bg-white px-3 py-1.5">Programmatic</button>
+      <button data-filter="function" data-value="analytics" class="filter-btn rounded-md border border-ink-200 bg-white px-3 py-1.5">Analytics</button>
+      <button data-filter="function" data-value="strategy" class="filter-btn rounded-md border border-ink-200 bg-white px-3 py-1.5">Strategy</button>
+      <button data-filter="function" data-value="leadership" class="filter-btn rounded-md border border-ink-200 bg-white px-3 py-1.5">Leadership</button>
+      <span class="mx-2 text-ink-300">|</span>
+      <button data-filter="remote" data-value="remote" class="filter-btn rounded-md border border-ink-200 bg-white px-3 py-1.5">Remote only</button>
+    </div>
+
+    <div id="job-list" class="mt-6 grid gap-3">
+      {jobs.map((j) => (
+        <div data-function={j.data.function} data-remote={j.data.remote} class="job-row">
+          <JobCard
+            href={`/jobs/${j.slug}/`}
+            title={j.data.title}
+            company={j.data.company}
+            location={j.data.location}
+            remote={j.data.remote}
+            func={j.data.function}
+            level={j.data.level}
+            salaryMin={j.data.salaryMin}
+            salaryMax={j.data.salaryMax}
+            postedAt={j.data.postedAt}
+            featured={j.data.featured}
+          />
+        </div>
+      ))}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .filter-btn.active { background: #0a7b6f; color: white; border-color: #0a7b6f; }
+</style>
+<script>
+  const filters: Record<string, string> = { function: "all", remote: "all" };
+  document.querySelectorAll<HTMLButtonElement>(".filter-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const f = btn.dataset.filter!;
+      const v = btn.dataset.value!;
+      if (f === "remote") {
+        filters.remote = filters.remote === "remote" ? "all" : "remote";
+        btn.classList.toggle("active");
+      } else {
+        filters[f] = v;
+        document
+          .querySelectorAll<HTMLButtonElement>(`.filter-btn[data-filter='${f}']`)
+          .forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+      }
+      document.querySelectorAll<HTMLElement>(".job-row").forEach((row) => {
+        const fn = row.dataset.function!;
+        const rm = row.dataset.remote!;
+        const fnOk = filters.function === "all" || filters.function === fn;
+        const rmOk = filters.remote === "all" || filters.remote === rm;
+        row.style.display = fnOk && rmOk ? "" : "none";
+      });
+    });
+  });
+</script>

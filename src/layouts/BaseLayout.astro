@@ -1,0 +1,76 @@
+---
+interface Props {
+  title: string;
+  description?: string;
+  canonical?: string;
+  jsonLd?: object;
+}
+const {
+  title,
+  description = "The job board for media planners, buyers, ad ops, and programmatic professionals. Built by the team behind Media Planning Tool.",
+  canonical,
+  jsonLd,
+} = Astro.props;
+const canonicalUrl = canonical ?? new URL(Astro.url.pathname, Astro.site).toString();
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="generator" content={Astro.generator} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href={canonicalUrl} />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+  </head>
+  <body class="min-h-screen bg-white text-ink-800 antialiased">
+    <header class="border-b border-ink-100 bg-white">
+      <div class="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
+        <a href="/" class="flex items-center gap-2 text-lg font-semibold text-ink-900">
+          <span class="text-brand">●</span> Media Planning Jobs
+        </a>
+        <nav class="flex items-center gap-6 text-sm text-ink-600">
+          <a href="/jobs" class="hover:text-ink-900">All Jobs</a>
+          <a href="/post-a-job" class="hover:text-ink-900">Post a Job</a>
+          <a href="/about" class="hover:text-ink-900">About</a>
+        </nav>
+      </div>
+    </header>
+    <main>
+      <slot />
+    </main>
+    <footer class="mt-24 border-t border-ink-100 bg-ink-50">
+      <div class="mx-auto max-w-6xl px-6 py-10 text-sm text-ink-500">
+        <div class="flex flex-wrap items-center justify-between gap-4">
+          <p>© {new Date().getFullYear()} Media Planning Jobs. A <a href="https://halliardmedia.com" class="text-brand hover:underline">Halliard</a> project.</p>
+          <p>
+            <a href="https://mediaplanningtool.com" class="hover:text-ink-800">mediaplanningtool.com</a>
+            ·
+            <a href="/jobs.json" class="hover:text-ink-800">JSON feed</a>
+            ·
+            <a href="/sitemap-index.xml" class="hover:text-ink-800">Sitemap</a>
+          </p>
+        </div>
+      </div>
+    </footer>
+  </body>
+</html>
+<style is:global>
+  :root {
+    color-scheme: light;
+  }
+  html { font-family: 'Inter', system-ui, sans-serif; }
+</style>

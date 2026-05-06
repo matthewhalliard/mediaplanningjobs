@@ -1,0 +1,114 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "../layouts/BaseLayout.astro";
+import JobCard from "../components/JobCard.astro";
+
+const jobs = (await getCollection("jobs"))
+  .sort((a, b) => b.data.postedAt.getTime() - a.data.postedAt.getTime());
+
+const featured = jobs.filter((j) => j.data.featured).slice(0, 3);
+const recent = jobs.filter((j) => !j.data.featured).slice(0, 12);
+
+const counts = {
+  planning: jobs.filter(j => j.data.function === "planning").length,
+  buying: jobs.filter(j => j.data.function === "buying").length,
+  "ad-ops": jobs.filter(j => j.data.function === "ad-ops").length,
+  programmatic: jobs.filter(j => j.data.function === "programmatic").length,
+  analytics: jobs.filter(j => j.data.function === "analytics").length,
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "Media Planning Jobs",
+  url: "https://mediaplanningjobs.io",
+  potentialAction: {
+    "@type": "SearchAction",
+    target: "https://mediaplanningjobs.io/jobs?q={search_term_string}",
+    "query-input": "required name=search_term_string",
+  },
+};
+---
+<BaseLayout
+  title="Media Planning Jobs — Planner, Buyer, Ad Ops & Programmatic Roles"
+  description="The specialist job board for media planners, media buyers, ad operations, and programmatic professionals. New roles every week. Built by Halliard."
+  jsonLd={jsonLd}
+>
+  <section class="border-b border-ink-100 bg-gradient-to-b from-ink-50 to-white">
+    <div class="mx-auto max-w-6xl px-6 py-16">
+      <h1 class="max-w-3xl text-4xl font-semibold tracking-tight text-ink-900 sm:text-5xl">
+        The job board for <span class="text-brand">media planners, buyers, and ad ops</span>.
+      </h1>
+      <p class="mt-4 max-w-2xl text-lg text-ink-600">
+        Curated roles in media planning, buying, programmatic, and ad operations from agencies, brands, and platforms. No SEO spam. No "remote work-from-home" garbage. Just jobs in the discipline.
+      </p>
+      <div class="mt-8 flex flex-wrap gap-3 text-sm">
+        <a href="/jobs?function=planning" class="rounded-md border border-ink-200 bg-white px-3 py-2 text-ink-700 hover:border-brand hover:text-brand">
+          Planning <span class="text-ink-400">({counts.planning})</span>
+        </a>
+        <a href="/jobs?function=buying" class="rounded-md border border-ink-200 bg-white px-3 py-2 text-ink-700 hover:border-brand hover:text-brand">
+          Buying <span class="text-ink-400">({counts.buying})</span>
+        </a>
+        <a href="/jobs?function=ad-ops" class="rounded-md border border-ink-200 bg-white px-3 py-2 text-ink-700 hover:border-brand hover:text-brand">
+          Ad Ops <span class="text-ink-400">({counts["ad-ops"]})</span>
+        </a>
+        <a href="/jobs?function=programmatic" class="rounded-md border border-ink-200 bg-white px-3 py-2 text-ink-700 hover:border-brand hover:text-brand">
+          Programmatic <span class="text-ink-400">({counts.programmatic})</span>
+        </a>
+        <a href="/jobs?function=analytics" class="rounded-md border border-ink-200 bg-white px-3 py-2 text-ink-700 hover:border-brand hover:text-brand">
+          Analytics <span class="text-ink-400">({counts.analytics})</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  {featured.length > 0 && (
+    <section class="mx-auto max-w-6xl px-6 py-12">
+      <h2 class="mb-4 text-sm font-semibold uppercase tracking-wide text-brand">
+        Featured roles
+      </h2>
+      <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {featured.map((j) => (
+          <JobCard
+            href={`/jobs/${j.slug}/`}
+            title={j.data.title}
+            company={j.data.company}
+            location={j.data.location}
+            remote={j.data.remote}
+            func={j.data.function}
+            level={j.data.level}
+            salaryMin={j.data.salaryMin}
+            salaryMax={j.data.salaryMax}
+            postedAt={j.data.postedAt}
+            featured={true}
+          />
+        ))}
+      </div>
+    </section>
+  )}
+
+  <section class="mx-auto max-w-6xl px-6 py-12">
+    <div class="mb-4 flex items-center justify-between">
+      <h2 class="text-2xl font-semibold text-ink-900">Latest jobs</h2>
+      <a href="/jobs" class="text-sm font-medium text-brand hover:underline">
+        See all {jobs.length} jobs →
+      </a>
+    </div>
+    <div class="grid gap-3">
+      {recent.map((j) => (
+        <JobCard
+          href={`/jobs/${j.slug}/`}
+          title={j.data.title}
+          company={j.data.company}
+          location={j.data.location}
+          remote={j.data.remote}
+          func={j.data.function}
+          level={j.data.level}
+          salaryMin={j.data.salaryMin}
+          salaryMax={j.data.salaryMax}
+          postedAt={j.data.postedAt}
+        />
+      ))}
+    </div>
+  </section>
+</BaseLayout>

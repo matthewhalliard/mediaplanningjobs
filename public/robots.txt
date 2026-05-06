@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://mediaplanningjobs.io/sitemap-index.xml

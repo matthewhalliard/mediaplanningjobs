@@ -1,0 +1,116 @@
+---
+import { getCollection, type CollectionEntry } from "astro:content";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+
+export async function getStaticPaths() {
+  const jobs = await getCollection("jobs");
+  return jobs.map((job) => ({ params: { slug: job.slug }, props: { job } }));
+}
+
+interface Props { job: CollectionEntry<"jobs">; }
+const { job } = Astro.props;
+const { Content } = await job.render();
+const d = job.data;
+
+const fmtSalary = (min?: number, max?: number) => {
+  if (!min && !max) return null;
+  const fmt = (n: number) => `$${(n / 1000).toFixed(0)}K`;
+  if (min && max) return `${fmt(min)} – ${fmt(max)}`;
+  if (min) return `${fmt(min)}+`;
+  return fmt(max!);
+};
+const salary = fmtSalary(d.salaryMin, d.salaryMax);
+
+// Google JobPosting schema — required for Google Jobs eligibility.
+const jsonLd: Record<string, unknown> = {
+  "@context": "https://schema.org",
+  "@type": "JobPosting",
+  title: d.title,
+  description: `<p>${d.title} at ${d.company}, based in ${d.location}.</p>`,
+  datePosted: d.postedAt.toISOString(),
+  validThrough: new Date(d.postedAt.getTime() + 60 * 86400000).toISOString(),
+  employmentType: d.employmentType,
+  hiringOrganization: {
+    "@type": "Organization",
+    name: d.company,
+    sameAs: d.companyUrl,
+  },
+  jobLocation: {
+    "@type": "Place",
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: d.location.split(",")[0]?.trim(),
+      addressRegion: d.location.split(",")[1]?.trim(),
+      addressCountry: "US",
+    },
+  },
+  directApply: false,
+  url: new URL(Astro.url.pathname, Astro.site).toString(),
+};
+if (d.remote === "remote") {
+  jsonLd.jobLocationType = "TELECOMMUTE";
+  jsonLd.applicantLocationRequirements = {
+    "@type": "Country",
+    name: "US",
+  };
+}
+if (d.salaryMin || d.salaryMax) {
+  jsonLd.baseSalary = {
+    "@type": "MonetaryAmount",
+    currency: "USD",
+    value: {
+      "@type": "QuantitativeValue",
+      minValue: d.salaryMin,
+      maxValue: d.salaryMax,
+      unitText: "YEAR",
+    },
+  };
+}
+---
+<BaseLayout
+  title={`${d.title} at ${d.company} — ${d.location}`}
+  description={`${d.title} role at ${d.company}, ${d.location}. Apply now on Media Planning Jobs.`}
+  jsonLd={jsonLd}
+>
+  <article class="mx-auto max-w-3xl px-6 py-12">
+    <a href="/jobs" class="text-sm text-ink-500 hover:text-ink-800">← All jobs</a>
+    <header class="mt-4 border-b border-ink-100 pb-6">
+      <h1 class="text-3xl font-semibold text-ink-900">{d.title}</h1>
+      <p class="mt-2 text-lg text-ink-700">
+        <span class="font-medium">{d.company}</span>
+        <span class="mx-2 text-ink-300">·</span>
+        <span>{d.location}</span>
+        {d.remote !== "onsite" && (
+          <>
+            <span class="mx-2 text-ink-300">·</span>
+            <span class="capitalize">{d.remote}</span>
+          </>
+        )}
+      </p>
+      <div class="mt-3 flex flex-wrap gap-2 text-sm">
+        <span class="rounded bg-ink-100 px-2 py-1 text-ink-700 capitalize">{d.function}</span>
+        <span class="rounded bg-ink-100 px-2 py-1 text-ink-700 capitalize">{d.level}</span>
+        {salary && <span class="rounded bg-brand/10 px-2 py-1 font-medium text-brand">{salary}</span>}
+      </div>
+      <div class="mt-6 flex items-center gap-3">
+        <a
+          href={d.applyUrl}
+          target="_blank"
+          rel="noopener nofollow"
+          class="rounded-md bg-brand px-5 py-2.5 font-medium text-white hover:bg-brand-dark"
+        >
+          Apply now ↗
+        </a>
+        <span class="text-sm text-ink-500">
+          Posted {d.postedAt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+        </span>
+      </div>
+    </header>
+    <div class="prose prose-ink mt-6 max-w-none text-ink-700">
+      <Content />
+    </div>
+    <div class="mt-10 rounded-lg border border-ink-100 bg-ink-50 p-5 text-sm text-ink-600">
+      Listing aggregated from {d.source ?? "public sources"}. Apply directly on the employer's site.
+    </div>
+  </article>
+</BaseLayout>
