@@ -2,9 +2,14 @@
 import { getCollection } from "astro:content";
 import BaseLayout from "../layouts/BaseLayout.astro";
 import JobCard from "../components/JobCard.astro";
+import { FUNCTION_INTROS } from "../data/functionIntros";
 
 const jobs = (await getCollection("jobs"))
   .sort((a, b) => b.data.postedAt.getTime() - a.data.postedAt.getTime());
+
+const byFunction = Object.fromEntries(
+  FUNCTION_INTROS.map((f) => [f.slug, jobs.filter((j) => j.data.function === f.slug).length]),
+);
 
 const featured = jobs.filter((j) => j.data.featured).slice(0, 3);
 const recent = jobs.filter((j) => !j.data.featured).slice(0, 12);
@@ -43,20 +48,20 @@ const jsonLd = {
         Curated roles in media planning, buying, programmatic, and ad operations from agencies, brands, and platforms. No SEO spam. No "remote work-from-home" garbage. Just jobs in the discipline.
       </p>
       <div class="mt-8 flex flex-wrap gap-3 text-sm">
-        <a href="/jobs?function=planning" class="rounded-md border border-ink-200 bg-white px-3 py-2 text-ink-700 hover:border-brand hover:text-brand">
-          Planning <span class="text-ink-400">({counts.planning})</span>
+        <a href="/jobs/function/media-planner/" class="rounded-md border border-ink-200 bg-white px-3 py-2 text-ink-700 hover:border-brand hover:text-brand">
+          Media Planner <span class="text-ink-400">({counts.planning})</span>
         </a>
-        <a href="/jobs?function=buying" class="rounded-md border border-ink-200 bg-white px-3 py-2 text-ink-700 hover:border-brand hover:text-brand">
-          Buying <span class="text-ink-400">({counts.buying})</span>
+        <a href="/jobs/function/media-buyer/" class="rounded-md border border-ink-200 bg-white px-3 py-2 text-ink-700 hover:border-brand hover:text-brand">
+          Media Buyer <span class="text-ink-400">({counts.buying})</span>
         </a>
-        <a href="/jobs?function=ad-ops" class="rounded-md border border-ink-200 bg-white px-3 py-2 text-ink-700 hover:border-brand hover:text-brand">
-          Ad Ops <span class="text-ink-400">({counts["ad-ops"]})</span>
+        <a href="/jobs/function/ad-operations/" class="rounded-md border border-ink-200 bg-white px-3 py-2 text-ink-700 hover:border-brand hover:text-brand">
+          Ad Operations <span class="text-ink-400">({counts["ad-ops"]})</span>
         </a>
-        <a href="/jobs?function=programmatic" class="rounded-md border border-ink-200 bg-white px-3 py-2 text-ink-700 hover:border-brand hover:text-brand">
+        <a href="/jobs/function/programmatic/" class="rounded-md border border-ink-200 bg-white px-3 py-2 text-ink-700 hover:border-brand hover:text-brand">
           Programmatic <span class="text-ink-400">({counts.programmatic})</span>
         </a>
-        <a href="/jobs?function=analytics" class="rounded-md border border-ink-200 bg-white px-3 py-2 text-ink-700 hover:border-brand hover:text-brand">
-          Analytics <span class="text-ink-400">({counts.analytics})</span>
+        <a href="/jobs/function/media-analyst/" class="rounded-md border border-ink-200 bg-white px-3 py-2 text-ink-700 hover:border-brand hover:text-brand">
+          Media Analyst <span class="text-ink-400">({counts.analytics})</span>
         </a>
       </div>
     </div>
@@ -108,6 +113,22 @@ const jsonLd = {
           salaryMax={j.data.salaryMax}
           postedAt={j.data.postedAt}
         />
+      ))}
+    </div>
+  </section>
+
+  <section class="mx-auto max-w-6xl px-6 py-12 border-t border-ink-100">
+    <h2 class="text-2xl font-semibold text-ink-900">Browse by role</h2>
+    <p class="mt-2 text-ink-600">Salary ranges, top employers, and every open role for each discipline.</p>
+    <div class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {FUNCTION_INTROS.map((f) => (
+        <a href={`/jobs/function/${f.urlSlug}/`} class="group rounded-lg border border-ink-200 bg-white p-4 hover:border-brand hover:shadow-sm">
+          <div class="flex items-baseline justify-between">
+            <h3 class="font-medium text-ink-900 group-hover:text-brand">{f.h1}</h3>
+            <span class="text-sm text-ink-500">{byFunction[f.slug]} open</span>
+          </div>
+          <p class="mt-1 text-sm text-ink-500">${(f.salaryBand.min/1000).toFixed(0)}K–${(f.salaryBand.max/1000).toFixed(0)}K typical</p>
+        </a>
       ))}
     </div>
   </section>
