@@ -1,1 +1,10 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="#0a7b6f"/><text x="16" y="22" font-family="Inter,system-ui,sans-serif" font-size="18" font-weight="700" fill="#fff" text-anchor="middle">M</text></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- Background, transparent so it adapts to dark/light browser tabs -->
+  <!-- Three Gantt-style bars suggesting a media plan timeline -->
+  <rect x="4"  y="9"  width="20" height="4" rx="2" fill="#0a7b6f"/>
+  <rect x="4"  y="16" width="14" height="4" rx="2" fill="#0a7b6f"/>
+  <rect x="4"  y="23" width="9"  height="4" rx="2" fill="#0a7b6f"/>
+  <!-- Job-board pin: location marker over the timeline -->
+  <circle cx="25" cy="7" r="4" fill="#0a7b6f"/>
+  <circle cx="25" cy="7" r="1.5" fill="#ffffff"/>
+</svg>
