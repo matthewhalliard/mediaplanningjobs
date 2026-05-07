@@ -14,13 +14,19 @@ const byFunction = Object.fromEntries(
 const featured = jobs.filter((j) => j.data.featured).slice(0, 3);
 const recent = jobs.filter((j) => !j.data.featured).slice(0, 12);
 
-const counts = {
-  planning: jobs.filter(j => j.data.function === "planning").length,
-  buying: jobs.filter(j => j.data.function === "buying").length,
-  "ad-ops": jobs.filter(j => j.data.function === "ad-ops").length,
-  programmatic: jobs.filter(j => j.data.function === "programmatic").length,
-  analytics: jobs.filter(j => j.data.function === "analytics").length,
-};
+// Discipline pill set — covers ALL function values so counts add up to total.
+const pills = [
+  { label: "Planning",      slug: "media-planner",   func: "planning" },
+  { label: "Buying",        slug: "media-buyer",     func: "buying" },
+  { label: "Programmatic",  slug: "programmatic",    func: "programmatic" },
+  { label: "Ad Ops",        slug: "ad-operations",   func: "ad-ops" },
+  { label: "Analytics",     slug: "media-analyst",   func: "analytics" },
+  { label: "Strategy",      slug: "media-strategy",  func: "strategy" },
+  { label: "Leadership",    slug: "media-director",  func: "leadership" },
+].map((p) => ({
+  ...p,
+  count: jobs.filter((j) => j.data.function === p.func).length,
+}));
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -45,24 +51,17 @@ const jsonLd = {
         The job board for <span class="text-brand">media planners, buyers, and ad ops</span>.
       </h1>
       <p class="mt-4 max-w-2xl text-lg text-ink-600">
-        Curated roles in media planning, buying, programmatic, and ad operations from agencies, brands, and platforms. No SEO spam. No "remote work-from-home" garbage. Just jobs in the discipline.
+        {jobs.length} open roles across planning, buying, programmatic, ad ops, and analytics &mdash; sourced from real agency and brand career pages, every weekday.
       </p>
-      <div class="mt-8 flex flex-wrap gap-3 text-sm">
-        <a href="/jobs/function/media-planner/" class="rounded-md border border-ink-200 bg-white px-3 py-2 text-ink-700 hover:border-brand hover:text-brand">
-          Media Planner <span class="text-ink-400">({counts.planning})</span>
-        </a>
-        <a href="/jobs/function/media-buyer/" class="rounded-md border border-ink-200 bg-white px-3 py-2 text-ink-700 hover:border-brand hover:text-brand">
-          Media Buyer <span class="text-ink-400">({counts.buying})</span>
-        </a>
-        <a href="/jobs/function/ad-operations/" class="rounded-md border border-ink-200 bg-white px-3 py-2 text-ink-700 hover:border-brand hover:text-brand">
-          Ad Operations <span class="text-ink-400">({counts["ad-ops"]})</span>
-        </a>
-        <a href="/jobs/function/programmatic/" class="rounded-md border border-ink-200 bg-white px-3 py-2 text-ink-700 hover:border-brand hover:text-brand">
-          Programmatic <span class="text-ink-400">({counts.programmatic})</span>
-        </a>
-        <a href="/jobs/function/media-analyst/" class="rounded-md border border-ink-200 bg-white px-3 py-2 text-ink-700 hover:border-brand hover:text-brand">
-          Media Analyst <span class="text-ink-400">({counts.analytics})</span>
-        </a>
+      <div class="mt-8 flex flex-wrap gap-2 text-sm">
+        {pills.map((p) => (
+          <a
+            href={`/jobs/function/${p.slug}/`}
+            class="rounded-md border border-ink-200 bg-white px-3 py-2 text-ink-700 hover:border-brand hover:text-brand"
+          >
+            {p.label} <span class="text-ink-400">({p.count})</span>
+          </a>
+        ))}
       </div>
     </div>
   </section>
