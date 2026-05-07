@@ -62,6 +62,7 @@ const canonicalUrl = canonical ?? new URL(Astro.url.pathname, Astro.site).toStri
         </a>
         <nav class="flex items-center gap-6 text-sm text-ink-600">
           <a href="/jobs" class="hover:text-ink-900">All Jobs</a>
+          <a href="/blog" class="hover:text-ink-900">Editorial</a>
           <a href="/post-a-job" class="hover:text-ink-900">Post a Job</a>
           <a href="/about" class="hover:text-ink-900">About</a>
         </nav>
@@ -76,6 +77,8 @@ const canonicalUrl = canonical ?? new URL(Astro.url.pathname, Astro.site).toStri
           <p>© {new Date().getFullYear()} Media Planning Jobs. A <a href="https://halliardmedia.com" class="text-brand hover:underline">Halliard</a> project.</p>
           <p>
             <a href="https://mediaplanningtool.com" class="hover:text-ink-800">mediaplanningtool.com</a>
+            ·
+            <a href="/feed.xml" class="hover:text-ink-800">RSS</a>
             ·
             <a href="/jobs.json" class="hover:text-ink-800">JSON feed</a>
             ·
