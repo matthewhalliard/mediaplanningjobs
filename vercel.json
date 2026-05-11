@@ -1,0 +1,17 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "trailingSlash": true,
+  "redirects": [
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.getmediaplanningjobs.com"
+        }
+      ],
+      "destination": "https://getmediaplanningjobs.com/$1",
+      "permanent": true
+    }
+  ]
+}
