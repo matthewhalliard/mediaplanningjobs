@@ -21,6 +21,8 @@ const fmtDate = (date: Date) =>
   date.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 
 const canonical = new URL(Astro.url.pathname, Astro.site).toString();
+const SITE_ORG_ID = "https://getmediaplanningjobs.com/#organization";
+const PUBLISHER_ID = "https://halliardmedia.com/#organization";
 
 // Combined JSON-LD graph: Article + (FAQPage if present) + BreadcrumbList.
 const graph: object[] = [
@@ -29,13 +31,16 @@ const graph: object[] = [
     "@id": canonical,
     headline: d.title,
     description: d.description,
+    inLanguage: "en-US",
     author: {
       "@type": "Organization",
+      "@id": SITE_ORG_ID,
       name: d.author,
-      url: "https://halliardmedia.com",
+      url: "https://getmediaplanningjobs.com",
     },
     publisher: {
       "@type": "Organization",
+      "@id": PUBLISHER_ID,
       name: "Halliard",
       url: "https://halliardmedia.com",
       logo: {

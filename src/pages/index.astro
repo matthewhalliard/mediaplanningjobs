@@ -36,16 +36,60 @@ const pills = [
   count: jobs.filter((j) => j.data.function === p.func).length,
 }));
 
+// Schema.org @graph: lets us declare WebSite + Organization as related
+// entities, with cross-references. LLMs and answer engines use this to
+// build a clean entity graph for our brand.
+const SITE_URL = "https://getmediaplanningjobs.com";
+const ORG_ID = `${SITE_URL}/#organization`;
+const PUBLISHER_ID = "https://halliardmedia.com/#organization";
+const WEBSITE_ID = `${SITE_URL}/#website`;
+
 const jsonLd = {
   "@context": "https://schema.org",
-  "@type": "WebSite",
-  name: "Media Planning Jobs",
-  url: "https://getmediaplanningjobs.com",
-  potentialAction: {
-    "@type": "SearchAction",
-    target: "https://getmediaplanningjobs.com/jobs?q={search_term_string}",
-    "query-input": "required name=search_term_string",
-  },
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": ORG_ID,
+      name: "Media Planning Jobs",
+      alternateName: "getmediaplanningjobs.com",
+      url: SITE_URL,
+      logo: `${SITE_URL}/logo.svg`,
+      description:
+        "The specialist job board for media planners, media buyers, ad operations, and programmatic professionals in the United States.",
+      parentOrganization: { "@id": PUBLISHER_ID },
+      sameAs: [
+        "https://halliardmedia.com",
+        "https://mediaplanningtool.com",
+      ],
+    },
+    {
+      "@type": "Organization",
+      "@id": PUBLISHER_ID,
+      name: "Halliard",
+      url: "https://halliardmedia.com",
+      sameAs: [
+        "https://halliardmedia.com",
+        "https://mediaplanningtool.com",
+        "https://getmediaplanningjobs.com",
+      ],
+    },
+    {
+      "@type": "WebSite",
+      "@id": WEBSITE_ID,
+      name: "Media Planning Jobs",
+      url: SITE_URL,
+      publisher: { "@id": ORG_ID },
+      inLanguage: "en-US",
+      potentialAction: {
+        "@type": "SearchAction",
+        target: {
+          "@type": "EntryPoint",
+          urlTemplate: `${SITE_URL}/jobs?q={search_term_string}`,
+        },
+        "query-input": "required name=search_term_string",
+      },
+    },
+  ],
 };
 ---
 <BaseLayout
