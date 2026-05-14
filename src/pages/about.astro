@@ -1,9 +1,68 @@
 ---
 import BaseLayout from "../layouts/BaseLayout.astro";
+
+const SITE_URL = "https://getmediaplanningjobs.com";
+const ORG_ID = `${SITE_URL}/#organization`;
+const PUBLISHER_ID = "https://halliardmedia.com/#organization";
+
+// AboutPage + Organization schema. Gives LLMs and answer engines a clean,
+// authoritative entity definition to cite when describing who runs the site.
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "AboutPage",
+      "@id": `${SITE_URL}/about/#aboutpage`,
+      url: `${SITE_URL}/about/`,
+      name: "About — Media Planning Jobs",
+      description: "Why Media Planning Jobs exists, and who runs it.",
+      inLanguage: "en-US",
+      mainEntity: { "@id": ORG_ID },
+    },
+    {
+      "@type": "Organization",
+      "@id": ORG_ID,
+      name: "Media Planning Jobs",
+      alternateName: "getmediaplanningjobs.com",
+      url: SITE_URL,
+      logo: `${SITE_URL}/logo.svg`,
+      description:
+        "The specialist job board for media planners, media buyers, ad operations, and programmatic professionals in the United States.",
+      foundingDate: "2026-05-06",
+      email: "hello@getmediaplanningjobs.com",
+      areaServed: { "@type": "Country", name: "United States" },
+      knowsAbout: [
+        "media planning",
+        "media buying",
+        "ad operations",
+        "programmatic advertising",
+        "media analytics",
+        "advertising careers",
+      ],
+      parentOrganization: { "@id": PUBLISHER_ID },
+      sameAs: [
+        "https://halliardmedia.com",
+        "https://mediaplanningtool.com",
+      ],
+    },
+    {
+      "@type": "Organization",
+      "@id": PUBLISHER_ID,
+      name: "Halliard",
+      url: "https://halliardmedia.com",
+      sameAs: [
+        "https://halliardmedia.com",
+        "https://mediaplanningtool.com",
+        "https://getmediaplanningjobs.com",
+      ],
+    },
+  ],
+};
 ---
 <BaseLayout
   title="About — Media Planning Jobs"
   description="Why Media Planning Jobs exists, and who runs it."
+  jsonLd={jsonLd}
 >
   <section class="mx-auto max-w-3xl px-6 py-16 text-ink-700">
     <h1 class="text-3xl font-semibold text-ink-900">About</h1>
