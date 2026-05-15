@@ -101,23 +101,40 @@ const jsonLd: Record<string, unknown> = {
     name: d.company,
     sameAs: d.companyUrl,
   },
-  jobLocation: {
-    "@type": "Place",
-    address: {
-      "@type": "PostalAddress",
-      addressLocality: d.location.split(",")[0]?.trim(),
-      addressRegion: d.location.split(",")[1]?.trim(),
-      addressCountry: "US",
-    },
-  },
   directApply: false,
   url: new URL(Astro.url.pathname, Astro.site).toString(),
 };
-if (d.remote === "remote") {
+
+// Location handling for Google JobPosting schema.
+// Adzuna feed gives us "City, County" (not state). We:
+//   - Treat country-only or comma-less locations as nationwide remote (TELECOMMUTE),
+//     which lets us omit jobLocation entirely (Google-compliant).
+//   - Drop addressRegion when it's a county name (schema.org expects a state/region,
+//     not a county; emitting a county here is invalid data).
+const locParts = d.location.split(",").map((s) => s.trim()).filter(Boolean);
+const isNationwide =
+  locParts.length < 2 || /^(US|USA|United States|Remote)$/i.test(d.location);
+if (isNationwide || d.remote === "remote") {
   jsonLd.jobLocationType = "TELECOMMUTE";
   jsonLd.applicantLocationRequirements = {
     "@type": "Country",
     name: "US",
+  };
+}
+if (!isNationwide) {
+  const locality = locParts[0];
+  const regionRaw = locParts[1];
+  const region =
+    regionRaw && !/county$/i.test(regionRaw) ? regionRaw : undefined;
+  const address: Record<string, string> = {
+    "@type": "PostalAddress",
+    addressLocality: locality,
+    addressCountry: "US",
+  };
+  if (region) address.addressRegion = region;
+  jsonLd.jobLocation = {
+    "@type": "Place",
+    address,
   };
 }
 if (d.salaryMin || d.salaryMax) {
