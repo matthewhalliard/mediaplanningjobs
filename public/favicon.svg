@@ -1,10 +1,6 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
-  <!-- Background, transparent so it adapts to dark/light browser tabs -->
-  <!-- Three Gantt-style bars suggesting a media plan timeline -->
-  <rect x="4"  y="9"  width="20" height="4" rx="2" fill="#0a7b6f"/>
-  <rect x="4"  y="16" width="14" height="4" rx="2" fill="#0a7b6f"/>
-  <rect x="4"  y="23" width="9"  height="4" rx="2" fill="#0a7b6f"/>
-  <!-- Job-board pin: location marker over the timeline -->
-  <circle cx="25" cy="7" r="4" fill="#0a7b6f"/>
-  <circle cx="25" cy="7" r="1.5" fill="#ffffff"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="14" fill="#b45309"/>
+  <path d="M25 22v-3a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v3" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+  <rect x="12" y="22" width="40" height="27" rx="6" fill="#fff"/>
+  <rect x="27" y="31" width="10" height="7" rx="2.5" fill="#f59e0b"/>
 </svg>
