@@ -1,0 +1,26 @@
+name: IndexNow
+
+# Tells Bing and other IndexNow search engines about this site's pages after
+# each deploy, so changes are picked up without waiting for a crawl.
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 13 * * *" # an hour after the daily job import, whose bot pushes trigger no workflows
+  workflow_dispatch:
+
+concurrency:
+  group: indexnow
+  cancel-in-progress: true
+
+jobs:
+  submit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Submit sitemap URLs
+        env:
+          SITE_HOST: getmediaplanningjobs.com
+          SITEMAP_URL: https://getmediaplanningjobs.com/sitemap-index.xml
+          WAIT_SECONDS: ${{ github.event_name == 'push' && '240' || '0' }}
+        run: python3 .github/scripts/indexnow.py
