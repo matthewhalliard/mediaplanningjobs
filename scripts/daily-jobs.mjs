@@ -61,6 +61,11 @@ export function classifyFunction(title) {
   // Must be a media / advertising role at all ("Data Scientist" alone is not).
   const mediaish = /\b(media|advertising|ad ops|adops|ad operations|programmatic|dsp|trafficker|paid social|paid search|ppc|biddable|marketing analytics|digital investment)\b/;
   if (!has(t, mediaish)) return null;
+  // Ad sales is selling inventory, not planning or buying it.
+  if (has(t, /\b(sales|account executive|business development)\b/)) return null;
+  // Organic social ("Social Media Manager") is not paid media unless the title says so.
+  const withoutSocial = t.replace(/\bsocial media\b/g, " ");
+  if (has(t, /\bsocial media\b/) && !has(withoutSocial, mediaish) && !has(t, /\b(paid|ads|buyer|buying|planner|planning)\b/)) return null;
   if (has(t, /\b(vp|svp|evp|vice president|chief|head of|media director|director of media)\b/)) return "leadership";
   if (has(t, /\b(ad ?ops|ad operations|advertising operations|trafficker|trafficking|campaign operations)\b/)) return "ad-ops";
   if (has(t, /\b(programmatic|dsp|trader|trading desk)\b/)) return "programmatic";
