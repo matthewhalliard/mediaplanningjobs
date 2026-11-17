@@ -1,6 +1,7 @@
 ---
 import { getCollection, type CollectionEntry } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
+import { FUNCTION_LABELS, LEVEL_LABELS, formatSalary } from "../../lib/format";
 
 export async function getStaticPaths() {
   const jobs = await getCollection("jobs");
@@ -73,14 +74,7 @@ const toJsonLdHtml = (raw: string): string => {
 };
 const descriptionHtml = toJsonLdHtml(job.body || "");
 
-const fmtSalary = (min?: number, max?: number) => {
-  if (!min && !max) return null;
-  const fmt = (n: number) => `$${(n / 1000).toFixed(0)}K`;
-  if (min && max) return `${fmt(min)} – ${fmt(max)}`;
-  if (min) return `${fmt(min)}+`;
-  return fmt(max!);
-};
-const salary = fmtSalary(d.salaryMin, d.salaryMax);
+const salary = formatSalary(d.salaryMin, d.salaryMax);
 
 // Google JobPosting schema — required for Google Jobs eligibility.
 const jsonLd: Record<string, unknown> = {
@@ -155,45 +149,78 @@ if (d.salaryMin || d.salaryMax) {
   description={`${d.title} role at ${d.company}, ${d.location}. Apply now on Media Planning Jobs.`}
   jsonLd={jsonLd}
 >
-  <article class="mx-auto max-w-3xl px-6 py-12">
-    <a href="/jobs" class="text-sm text-ink-500 hover:text-ink-800">← All jobs</a>
-    <header class="mt-4 border-b border-ink-100 pb-6">
-      <h1 class="text-3xl font-semibold text-ink-900">{d.title}</h1>
-      <p class="mt-2 text-lg text-ink-700">
-        <span class="font-medium">{d.company}</span>
-        <span class="mx-2 text-ink-300">·</span>
-        <span>{d.location}</span>
-        {d.remote !== "onsite" && (
-          <>
-            <span class="mx-2 text-ink-300">·</span>
-            <span class="capitalize">{d.remote}</span>
-          </>
-        )}
-      </p>
-      <div class="mt-3 flex flex-wrap gap-2 text-sm">
-        <span class="rounded bg-ink-100 px-2 py-1 text-ink-700 capitalize">{d.function}</span>
-        <span class="rounded bg-ink-100 px-2 py-1 text-ink-700 capitalize">{d.level}</span>
-        {salary && <span class="rounded bg-brand/10 px-2 py-1 font-medium text-brand">{salary}</span>}
+  <article class="mx-auto max-w-site px-6 pb-16 pt-10">
+    <nav class="font-mono text-[13px] text-ink-500" aria-label="Breadcrumb">
+      <a href="/jobs/" class="hover:text-ink-950">← All jobs</a>
+    </nav>
+    <div class="mt-6 grid gap-10 lg:grid-cols-[minmax(0,1fr)_320px]">
+      <div class="min-w-0">
+        <header class="flex flex-col gap-4 border-b border-ink-200 pb-8">
+          <div class="flex items-center gap-3">
+            <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-[10px] bg-ink-100 font-semibold" aria-hidden="true">{d.company.trim().charAt(0).toUpperCase()}</span>
+            <p class="text-[17px] text-ink-600">
+              <span class="font-medium text-ink-950">{d.company}</span>
+              <span> · {d.location}</span>
+              {d.remote !== "onsite" && <span class="capitalize"> · {d.remote}</span>}
+            </p>
+          </div>
+          <h1 class="text-[clamp(32px,4.5vw,52px)] font-semibold leading-[1.04] tracking-display">{d.title}</h1>
+          <div class="flex flex-wrap gap-1.5 text-xs">
+            <span class="rounded-md bg-brand-tint px-2 py-1 text-brand-dark">{FUNCTION_LABELS[d.function] ?? d.function}</span>
+            <span class="rounded-md bg-ink-100 px-2 py-1 text-ink-700">{LEVEL_LABELS[d.level] ?? d.level}</span>
+          </div>
+          <div class="flex flex-wrap items-center justify-between gap-3 pt-2 lg:hidden">
+            <span class:list={["font-mono text-xl font-medium", salary ? "text-ink-950" : "text-ink-400"]}>{salary ?? "Salary not listed"}</span>
+            <a
+              href={d.applyUrl}
+              target="_blank"
+              rel="noopener nofollow"
+              class="flex h-11 items-center justify-center rounded-[10px] bg-ink-950 px-5 font-medium text-white"
+            >Apply ↗</a>
+          </div>
+        </header>
+        <div class="job-body mt-8 text-ink-700">
+          <Content />
+        </div>
+        <p class="mt-10 rounded-card border border-ink-200 bg-white p-5 text-sm text-ink-600">
+          Listing aggregated from {d.source ?? "public sources"}. Apply directly on the employer's site.
+        </p>
       </div>
-      <div class="mt-6 flex items-center gap-3">
-        <a
-          href={d.applyUrl}
-          target="_blank"
-          rel="noopener nofollow"
-          class="rounded-md bg-brand px-5 py-2.5 font-medium text-white hover:bg-brand-dark"
-        >
-          Apply now ↗
-        </a>
-        <span class="text-sm text-ink-500">
-          Posted {d.postedAt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
-        </span>
-      </div>
-    </header>
-    <div class="prose prose-ink mt-6 max-w-none text-ink-700">
-      <Content />
-    </div>
-    <div class="mt-10 rounded-lg border border-ink-100 bg-ink-50 p-5 text-sm text-ink-600">
-      Listing aggregated from {d.source ?? "public sources"}. Apply directly on the employer's site.
+      <aside class="lg:sticky lg:top-6 lg:self-start">
+        <div class="flex flex-col gap-5 rounded-card border border-ink-200 bg-white p-6">
+          <div class="flex flex-col gap-1">
+            <span class="font-mono text-xs uppercase tracking-[0.04em] text-ink-500">Salary</span>
+            <span class:list={["font-mono text-2xl font-medium", salary ? "text-ink-950" : "text-ink-400"]}>{salary ?? "Not listed"}</span>
+          </div>
+          <dl class="flex flex-col gap-2 border-t border-ink-100 pt-4 text-sm">
+            <div class="flex justify-between gap-4"><dt class="text-ink-600">Posted</dt><dd class="font-mono text-[13px]">{d.postedAt.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</dd></div>
+            <div class="flex justify-between gap-4"><dt class="text-ink-600">Type</dt><dd class="font-mono text-[13px]">{d.employmentType.replace("_", " ").toLowerCase()}</dd></div>
+            <div class="flex justify-between gap-4"><dt class="text-ink-600">Workplace</dt><dd class="font-mono text-[13px] capitalize">{d.remote}</dd></div>
+          </dl>
+          <a
+            href={d.applyUrl}
+            target="_blank"
+            rel="noopener nofollow"
+            class="flex h-12 items-center justify-center rounded-[10px] bg-ink-950 px-5 font-medium text-white transition-colors hover:bg-ink-800"
+          >
+            Apply on employer site ↗
+          </a>
+        </div>
+      </aside>
     </div>
   </article>
 </BaseLayout>
+
+<style is:global>
+  .job-body { font-size: 1.0625rem; line-height: 1.7; }
+  .job-body > * + * { margin-top: 1em; }
+  .job-body h2, .job-body h3 { color: #0C0A09; font-weight: 600; letter-spacing: -0.02em; margin-top: 1.75em; }
+  .job-body h2 { font-size: 1.375rem; }
+  .job-body h3 { font-size: 1.15rem; }
+  .job-body ul { list-style: disc; padding-left: 1.4rem; }
+  .job-body ol { list-style: decimal; padding-left: 1.4rem; }
+  .job-body li + li { margin-top: 0.4em; }
+  .job-body a { color: #047857; text-decoration: underline; text-underline-offset: 3px; }
+  .job-body strong { color: #0C0A09; font-weight: 600; }
+</style>
+

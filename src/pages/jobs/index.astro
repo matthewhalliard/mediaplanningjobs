@@ -2,34 +2,72 @@
 import { getCollection } from "astro:content";
 import BaseLayout from "../../layouts/BaseLayout.astro";
 import JobCard from "../../components/JobCard.astro";
+import JobList from "../../components/JobList.astro";
+import { FUNCTION_LABELS } from "../../lib/format";
 
 const jobs = (await getCollection("jobs"))
   .sort((a, b) => b.data.postedAt.getTime() - a.data.postedAt.getTime());
+
+const functionFilters = ["planning", "buying", "ad-ops", "programmatic", "analytics", "strategy", "leadership"]
+  .map((value) => ({
+    value,
+    label: FUNCTION_LABELS[value],
+    count: jobs.filter((j) => j.data.function === value).length,
+  }));
+const remoteCount = jobs.filter((j) => j.data.remote === "remote").length;
+
+const pill =
+  "filter-btn flex h-9 items-center gap-1.5 rounded-full border border-ink-200 bg-white px-3.5 text-sm text-ink-950 transition-colors hover:border-ink-950";
 ---
 <BaseLayout
   title={`All ${jobs.length} Media Planning Jobs`}
   description="Every media planning, buying, ad ops, and programmatic role on Media Planning Jobs."
 >
-  <section class="mx-auto max-w-6xl px-6 py-12">
-    <h1 class="text-3xl font-semibold text-ink-900">All jobs</h1>
-    <p class="mt-2 text-ink-600">{jobs.length} open roles across the discipline.</p>
-
-    <div id="filters" class="mt-6 flex flex-wrap gap-2 text-sm">
-      <button data-filter="function" data-value="all" class="filter-btn active rounded-md border border-ink-200 bg-white px-3 py-1.5">All</button>
-      <button data-filter="function" data-value="planning" class="filter-btn rounded-md border border-ink-200 bg-white px-3 py-1.5">Planning</button>
-      <button data-filter="function" data-value="buying" class="filter-btn rounded-md border border-ink-200 bg-white px-3 py-1.5">Buying</button>
-      <button data-filter="function" data-value="ad-ops" class="filter-btn rounded-md border border-ink-200 bg-white px-3 py-1.5">Ad Ops</button>
-      <button data-filter="function" data-value="programmatic" class="filter-btn rounded-md border border-ink-200 bg-white px-3 py-1.5">Programmatic</button>
-      <button data-filter="function" data-value="analytics" class="filter-btn rounded-md border border-ink-200 bg-white px-3 py-1.5">Analytics</button>
-      <button data-filter="function" data-value="strategy" class="filter-btn rounded-md border border-ink-200 bg-white px-3 py-1.5">Strategy</button>
-      <button data-filter="function" data-value="leadership" class="filter-btn rounded-md border border-ink-200 bg-white px-3 py-1.5">Leadership</button>
-      <span class="mx-2 text-ink-300">|</span>
-      <button data-filter="remote" data-value="remote" class="filter-btn rounded-md border border-ink-200 bg-white px-3 py-1.5">Remote only</button>
+  <section class="mx-auto flex max-w-site flex-col gap-6 px-6 pb-16 pt-12 sm:pt-16">
+    <div class="flex flex-col gap-3">
+      <p class="flex items-center gap-2.5 font-mono text-[13px] text-ink-600">
+        <span class="h-2 w-2 rounded-full bg-brand" aria-hidden="true"></span>
+        <span><span id="visible-count">{jobs.length}</span> of {jobs.length} open roles</span>
+      </p>
+      <h1 class="text-[clamp(36px,5vw,56px)] font-semibold leading-[1.02] tracking-display">All jobs</h1>
     </div>
 
-    <div id="job-list" class="mt-6 grid gap-3">
+    <form id="job-search" action="/jobs/" method="get" role="search" class="flex max-w-[820px] flex-wrap gap-2 rounded-2xl border border-ink-300 bg-white p-2">
+      <label class="flex h-12 min-w-0 flex-[2_1_260px] items-center gap-2.5 px-3">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#78716C" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20 L16 16"></path></svg>
+        <span class="sr-only">Role, skill or company</span>
+        <input id="q" type="search" name="q" placeholder="Role, skill or company" class="min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-ink-500" />
+      </label>
+      <label class="flex h-12 min-w-0 flex-[1_1_200px] items-center gap-2.5 border-ink-200 px-3 max-sm:border-t sm:border-l">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#78716C" stroke-width="2" aria-hidden="true"><path d="M12 21 C12 21 5 14.5 5 9.5 A7 7 0 0 1 19 9.5 C19 14.5 12 21 12 21 Z"></path><circle cx="12" cy="9.5" r="2.5"></circle></svg>
+        <span class="sr-only">City or remote</span>
+        <input id="loc" type="text" name="loc" placeholder="City or remote" class="min-w-0 flex-1 bg-transparent text-base outline-none placeholder:text-ink-500" />
+      </label>
+      <button type="submit" class="h-12 rounded-[10px] bg-ink-950 px-6 text-base font-medium text-white transition-colors hover:bg-ink-800 max-sm:w-full">Search jobs</button>
+    </form>
+
+    <div id="filters" class="flex flex-wrap gap-2">
+      <button type="button" data-filter="function" data-value="all" class={`${pill} active`}>All</button>
+      {functionFilters.map((f) => (
+        <button type="button" data-filter="function" data-value={f.value} class={pill}>
+          {f.label} <span class="font-mono text-ink-500">{f.count}</span>
+        </button>
+      ))}
+      <span class="mx-1 self-center text-ink-300" aria-hidden="true">|</span>
+      <button type="button" data-filter="remote" data-value="remote" class={pill}>
+        Remote only <span class="font-mono text-ink-500">{remoteCount}</span>
+      </button>
+    </div>
+
+    <JobList id="job-list">
       {jobs.map((j) => (
-        <div data-function={j.data.function} data-remote={j.data.remote} class="job-row">
+        <div
+          data-function={j.data.function}
+          data-remote={j.data.remote}
+          data-text={`${j.data.title} ${j.data.company} ${j.data.function}`.toLowerCase()}
+          data-loc={`${j.data.location} ${j.data.remote}`.toLowerCase()}
+          class="job-row"
+        >
           <JobCard
             href={`/jobs/${j.slug}/`}
             title={j.data.title}
@@ -45,15 +83,55 @@ const jobs = (await getCollection("jobs"))
           />
         </div>
       ))}
-    </div>
+      <p id="no-results" class="hidden border-b border-ink-100 px-6 py-10 text-center text-ink-600">
+        No roles match that search. Try a broader term or clear a filter.
+      </p>
+    </JobList>
   </section>
 </BaseLayout>
 
 <style>
-  .filter-btn.active { background: #0a7b6f; color: white; border-color: #0a7b6f; }
+  .filter-btn.active { background: #0C0A09; color: #FFFFFF; border-color: #0C0A09; }
+  .filter-btn.active span { color: #A8A29E; }
 </style>
 <script>
   const filters: Record<string, string> = { function: "all", remote: "all" };
+  const qInput = document.getElementById("q") as HTMLInputElement;
+  const locInput = document.getElementById("loc") as HTMLInputElement;
+  const params = new URLSearchParams(location.search);
+  qInput.value = params.get("q") ?? "";
+  locInput.value = params.get("loc") ?? "";
+
+  const apply = () => {
+    const q = qInput.value.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    const loc = locInput.value.trim().toLowerCase();
+    let shown = 0;
+    document.querySelectorAll<HTMLElement>(".job-row").forEach((row) => {
+      const fnOk = filters.function === "all" || filters.function === row.dataset.function;
+      const rmOk = filters.remote === "all" || filters.remote === row.dataset.remote;
+      const text = row.dataset.text ?? "";
+      const qOk = q.every((w) => text.includes(w));
+      const locOk = !loc || (row.dataset.loc ?? "").includes(loc);
+      const ok = fnOk && rmOk && qOk && locOk;
+      row.style.display = ok ? "" : "none";
+      if (ok) shown++;
+    });
+    document.getElementById("visible-count")!.textContent = String(shown);
+    document.getElementById("no-results")!.classList.toggle("hidden", shown > 0);
+  };
+
+  document.getElementById("job-search")!.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const next = new URLSearchParams();
+    if (qInput.value.trim()) next.set("q", qInput.value.trim());
+    if (locInput.value.trim()) next.set("loc", locInput.value.trim());
+    const qs = next.toString();
+    history.replaceState(null, "", qs ? `?${qs}` : location.pathname);
+    apply();
+  });
+  qInput.addEventListener("input", apply);
+  locInput.addEventListener("input", apply);
+
   document.querySelectorAll<HTMLButtonElement>(".filter-btn").forEach((btn) => {
     btn.addEventListener("click", () => {
       const f = btn.dataset.filter!;
@@ -68,13 +146,9 @@ const jobs = (await getCollection("jobs"))
           .forEach((b) => b.classList.remove("active"));
         btn.classList.add("active");
       }
-      document.querySelectorAll<HTMLElement>(".job-row").forEach((row) => {
-        const fn = row.dataset.function!;
-        const rm = row.dataset.remote!;
-        const fnOk = filters.function === "all" || filters.function === fn;
-        const rmOk = filters.remote === "all" || filters.remote === rm;
-        row.style.display = fnOk && rmOk ? "" : "none";
-      });
+      apply();
     });
   });
+
+  apply();
 </script>

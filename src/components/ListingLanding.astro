@@ -1,0 +1,95 @@
+---
+// Shared body for /jobs/city/* and /jobs/function/* landing pages.
+import type { CollectionEntry } from "astro:content";
+import JobCard from "./JobCard.astro";
+import JobList from "./JobList.astro";
+
+interface Props {
+  crumb: string;
+  h1: string;
+  countLabel: string;
+  salaryRange: string;
+  salaryNote?: string;
+  intro: string[];
+  listHeading: string;
+  emptyLabel: string;
+  jobs: CollectionEntry<"jobs">[];
+  employersHeading: string;
+  topEmployers: string[];
+  faqs: { q: string; a: string }[];
+}
+const {
+  crumb, h1, countLabel, salaryRange, salaryNote, intro, listHeading, emptyLabel,
+  jobs, employersHeading, topEmployers, faqs,
+} = Astro.props;
+---
+<section class="mx-auto flex max-w-site flex-col gap-6 px-6 pb-10 pt-10">
+  <nav class="font-mono text-[13px] text-ink-500" aria-label="Breadcrumb">
+    <a href="/" class="hover:text-ink-950">Home</a>
+    <span class="mx-1.5">/</span>
+    <a href="/jobs/" class="hover:text-ink-950">Jobs</a>
+    <span class="mx-1.5">/</span>
+    <span class="text-ink-700">{crumb}</span>
+  </nav>
+  <h1 class="max-w-[900px] text-[clamp(36px,5vw,60px)] font-semibold leading-[1.02] tracking-display">{h1}</h1>
+  <div class="flex flex-wrap gap-3">
+    <span class="flex items-center gap-2.5 rounded-full border border-ink-200 bg-white px-3.5 py-1.5 font-mono text-[13px] text-ink-700">
+      <span class="h-2 w-2 rounded-full bg-brand" aria-hidden="true"></span>{countLabel}
+    </span>
+    <span class="rounded-full border border-ink-200 bg-white px-3.5 py-1.5 font-mono text-[13px] text-ink-700">
+      {salaryRange} typical{salaryNote && <span class="text-ink-500"> ({salaryNote})</span>}
+    </span>
+  </div>
+  <div class="flex max-w-[760px] flex-col gap-4 text-[17px] leading-[1.65] text-ink-700">
+    {intro.map((p) => <p>{p}</p>)}
+  </div>
+</section>
+
+<section class="mx-auto flex max-w-site flex-col gap-5 px-6 pb-16">
+  <h2 class="text-[28px] font-semibold tracking-heading">{listHeading}</h2>
+  {jobs.length === 0 ? (
+    <p class="rounded-card border border-ink-200 bg-white p-6 text-ink-600">
+      No open {emptyLabel} roles right now. New listings post daily —
+      <a href="/jobs/" class="text-brand underline underline-offset-2">browse all jobs</a> or check back tomorrow.
+    </p>
+  ) : (
+    <JobList>
+      {jobs.map((j) => (
+        <JobCard
+          href={`/jobs/${j.slug}/`}
+          title={j.data.title}
+          company={j.data.company}
+          location={j.data.location}
+          remote={j.data.remote}
+          func={j.data.function}
+          level={j.data.level}
+          salaryMin={j.data.salaryMin}
+          salaryMax={j.data.salaryMax}
+          postedAt={j.data.postedAt}
+          featured={j.data.featured}
+        />
+      ))}
+    </JobList>
+  )}
+</section>
+
+<section class="mx-auto flex max-w-site flex-col gap-5 px-6 pb-16">
+  <h2 class="text-[28px] font-semibold tracking-heading">{employersHeading}</h2>
+  <ul class="flex flex-wrap gap-2 text-sm">
+    {topEmployers.map((e) => (
+      <li class="flex h-9 items-center rounded-full border border-ink-200 bg-white px-3.5 text-ink-950">{e}</li>
+    ))}
+  </ul>
+</section>
+
+<section class="mx-auto flex max-w-site flex-col gap-5 px-6 pb-16">
+  <h2 class="text-[28px] font-semibold tracking-heading">FAQs</h2>
+  <div class="overflow-hidden rounded-card border border-ink-200 bg-white">
+    {faqs.map((f, i) => (
+      <div class:list={["flex flex-col gap-2 p-6", i > 0 && "border-t border-ink-100"]}>
+        <h3 class="text-[17px] font-semibold tracking-[-0.01em]">{f.q}</h3>
+        <p class="max-w-[760px] leading-[1.65] text-ink-700">{f.a}</p>
+      </div>
+    ))}
+  </div>
+</section>

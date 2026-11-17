@@ -4,27 +4,43 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Warm stone neutrals. ink-950 is the text colour, ink-600 secondary text,
+        // ink-200 hairline borders, ink-50 the page ground.
         ink: {
-          50: "#f7f7f8",
-          100: "#eeeef0",
-          200: "#d8d8dd",
-          300: "#b4b4bd",
-          400: "#878793",
-          500: "#5b5b67",
-          600: "#3f3f48",
-          700: "#2d2d34",
-          800: "#1d1d22",
-          900: "#0e0e11",
+          50: "#FAFAF9",
+          100: "#F5F5F4",
+          200: "#E7E5E4",
+          300: "#D6D3D1",
+          400: "#A8A29E",
+          500: "#78716C",
+          600: "#57534E",
+          700: "#44403C",
+          800: "#292524",
+          900: "#1C1917",
+          950: "#0C0A09",
         },
+        // Emerald accent.
         brand: {
-          DEFAULT: "#0a7b6f",
-          dark: "#075c54",
-          light: "#1ea394",
+          DEFAULT: "#047857",
+          dark: "#065F46",
+          light: "#34D399",
+          tint: "#ECFDF5",
+          line: "#D1FAE5",
         },
       },
       fontFamily: {
-        sans: ["Inter", "system-ui", "-apple-system", "sans-serif"],
-        mono: ["ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
+        sans: ["Geist", "system-ui", "-apple-system", "sans-serif"],
+        mono: ["'Geist Mono'", "ui-monospace", "SFMono-Regular", "Menlo", "monospace"],
+      },
+      maxWidth: {
+        site: "1200px",
+      },
+      borderRadius: {
+        card: "14px",
+      },
+      letterSpacing: {
+        display: "-0.045em",
+        heading: "-0.025em",
       },
     },
   },
