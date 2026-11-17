@@ -1,0 +1,49 @@
+name: Daily jobs
+
+# Adds fresh Adzuna listings and removes expired ones every morning, then
+# commits to main so Vercel redeploys the site.
+on:
+  schedule:
+    - cron: "0 12 * * *" # 8am New York (EDT), 7am in winter
+  workflow_dispatch:
+    inputs:
+      max_new:
+        description: "How many new listings to add (use a larger number for a backfill)"
+        default: "10"
+        required: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-jobs
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Import and prune
+        env:
+          ADZUNA_APP_ID: ${{ secrets.ADZUNA_APP_ID }}
+          ADZUNA_APP_KEY: ${{ secrets.ADZUNA_APP_KEY }}
+          MAX_NEW: ${{ github.event.inputs.max_new || '10' }}
+        run: node scripts/daily-jobs.mjs
+
+      - name: Commit changes
+        run: |
+          git add -A src/content/jobs
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -F .daily-jobs-commit-message
+          git push
