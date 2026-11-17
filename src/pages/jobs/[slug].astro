@@ -88,7 +88,8 @@ const jsonLd: Record<string, unknown> = {
     value: job.slug,
   },
   datePosted: d.postedAt.toISOString(),
-  validThrough: new Date(d.postedAt.getTime() + 60 * 86400000).toISOString(),
+  // Matches the 45-day expiry in scripts/daily-jobs.mjs.
+  validThrough: new Date(d.postedAt.getTime() + 45 * 86400000).toISOString(),
   employmentType: d.employmentType,
   hiringOrganization: {
     "@type": "Organization",
