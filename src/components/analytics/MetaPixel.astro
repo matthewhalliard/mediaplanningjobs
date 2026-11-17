@@ -29,7 +29,8 @@ const PIXEL_ID = "1357860072487371";
 
     if (navigator.globalPrivacyControl) return disable();
 
-    fetch("/api/ad-consent", { credentials: "same-origin" })
+    // Trailing slash: vercel.json has trailingSlash: true, so the bare path 308s.
+    fetch("/api/ad-consent/", { credentials: "same-origin" })
       .then(function (r) { return r.ok ? r.json() : { allowed: false }; })
       .then(function (res) {
         if (!res || !res.allowed) return disable();
