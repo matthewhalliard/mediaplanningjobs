@@ -1,0 +1,41 @@
+---
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+const updated = "November 17, 2026";
+const link = "font-medium text-brand hover:text-brand-dark";
+---
+<BaseLayout
+  title="Privacy — Media Planning Jobs"
+  description="What Media Planning Jobs measures, with which tools, and how to opt out."
+>
+  <section class="mx-auto max-w-3xl px-6 py-16 text-ink-700">
+    <h1 class="text-[clamp(36px,5vw,56px)] font-semibold leading-[1.02] tracking-display text-ink-950">Privacy</h1>
+    <p class="mt-3 font-mono text-[13px] text-ink-500">Last updated {updated}</p>
+    <p class="mt-6 text-lg">
+      Media Planning Jobs has no accounts and asks for no personal details to browse or apply. Applications happen on the employer's own site. We measure how the site is used with the tools below.
+    </p>
+
+    <h2 class="mt-10 text-xl font-semibold text-ink-900">PostHog (site analytics)</h2>
+    <p class="mt-2">
+      We use <a class={link} href="https://posthog.com/privacy" rel="noopener">PostHog</a> to count page views and see which jobs, roles and guides people read. It sets a first-party cookie to recognise a returning browser. The data sits in a PostHog project shared by the three Halliard sites (this one, mediaplanningtool.com and agenticadvertisingtools.com) and is not used to identify you.
+    </p>
+
+    <h2 class="mt-8 text-xl font-semibold text-ink-900">Meta Pixel (advertising)</h2>
+    <p class="mt-2">
+      We use a Meta Pixel shared with <a class={link} href="https://halliardmedia.com" data-halliard-placement="privacy">Halliard</a>, the publisher of this site. It tells Meta (Facebook and Instagram) that a browser viewed a page, and which kind of job or guide it was (function, level, location, remote or onsite, company), so Halliard can measure and reach people interested in media planning and buying with its ads. No names, emails or other personal details you type are sent. Meta's use of this data is covered by <a class={link} href="https://www.facebook.com/privacy/policy/" rel="noopener">Meta's privacy policy</a>.
+    </p>
+    <ul class="mt-3 list-disc space-y-1.5 pl-6">
+      <li>The pixel is <strong class="text-ink-950">not loaded for visitors in the EEA, the UK or Switzerland</strong>.</li>
+      <li>The pixel is <strong class="text-ink-950">not loaded if your browser sends Global Privacy Control</strong> (GPC), which we treat as an opt-out of sharing and targeted advertising.</li>
+      <li>You can also block it with your browser's tracking protection, or change your ad preferences in your Meta account settings.</li>
+    </ul>
+
+    <h2 class="mt-8 text-xl font-semibold text-ink-900">Hosting</h2>
+    <p class="mt-2">
+      The site is hosted on Vercel, which processes IP addresses to serve pages and to tell us which country a visit comes from (used only for the rule above; the address is not stored by us).
+    </p>
+
+    <h2 class="mt-8 text-xl font-semibold text-ink-900">Contact</h2>
+    <p class="mt-2">Questions or requests: <a class={link} href="mailto:hello@getmediaplanningjobs.com">hello@getmediaplanningjobs.com</a></p>
+  </section>
+</BaseLayout>

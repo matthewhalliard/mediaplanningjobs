@@ -76,6 +76,16 @@ const descriptionHtml = toJsonLdHtml(job.body || "");
 
 const salary = formatSalary(d.salaryMin, d.salaryMax);
 
+// ViewJob (Meta, custom) + job_viewed (PostHog). Job attributes only, no personal data.
+const viewJob = {
+  function: d.function,
+  level: d.level,
+  location: d.location,
+  remote: d.remote,
+  company: d.company,
+  site: "getmediaplanningjobs",
+};
+
 // Google JobPosting schema — required for Google Jobs eligibility.
 const jsonLd: Record<string, unknown> = {
   "@context": "https://schema.org",
@@ -150,6 +160,10 @@ if (d.salaryMin || d.salaryMax) {
   description={`${d.title} role at ${d.company}, ${d.location}. Apply now on Media Planning Jobs.`}
   jsonLd={jsonLd}
 >
+  <script is:inline define:vars={{ viewJob }}>
+    if (window.fbq) window.fbq("trackCustom", "ViewJob", viewJob);
+    if (window.posthog && window.posthog.capture) window.posthog.capture("job_viewed", viewJob);
+  </script>
   <article class="mx-auto max-w-site px-6 pb-16 pt-10">
     <nav class="font-mono text-[13px] text-ink-500" aria-label="Breadcrumb">
       <a href="/jobs/" class="hover:text-ink-950">← All jobs</a>

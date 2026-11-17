@@ -25,6 +25,14 @@ const salaryRange = `${fmtSalary(intro.salaryBand.min)}–${fmtSalary(intro.sala
 
 const canonical = new URL(Astro.url.pathname, Astro.site).toString();
 
+// ViewContent (Meta). Page attributes only, no personal data.
+const viewContent = {
+  content_name: intro.label,
+  content_category: intro.slug,
+  content_type: "job_listing_page",
+  site: "getmediaplanningjobs",
+};
+
 // Combined JSON-LD graph: FAQPage + CollectionPage + BreadcrumbList.
 const jsonLd = {
   "@context": "https://schema.org",
@@ -80,6 +88,9 @@ const jsonLd = {
   canonical={canonical}
   jsonLd={jsonLd}
 >
+  <script is:inline define:vars={{ viewContent }}>
+    if (window.fbq) window.fbq("track", "ViewContent", viewContent);
+  </script>
   <ListingLanding
     crumb={intro.label}
     h1={intro.h1}

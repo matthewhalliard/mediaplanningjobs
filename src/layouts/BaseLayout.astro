@@ -1,4 +1,6 @@
 ---
+import MetaPixel from "../components/analytics/MetaPixel.astro";
+
 interface Props {
   title: string;
   description?: string;
@@ -47,6 +49,7 @@ const canonicalUrl = canonical ?? new URL(Astro.url.pathname, Astro.site).toStri
       href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
+    <MetaPixel />
     {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
     <!-- PostHog: "Halliard Network" project (742582), shared by the three network sites only. Filter by $host = 'getmediaplanningjobs.com' to scope. -->
     <script is:inline>
@@ -93,9 +96,38 @@ const canonicalUrl = canonical ?? new URL(Astro.url.pathname, Astro.site).toStri
           <a href="/feed.xml" class="hover:text-ink-950">RSS</a>
           <a href="/jobs.json" class="hover:text-ink-950">JSON feed</a>
           <a href="/sitemap-index.xml" class="hover:text-ink-950">Sitemap</a>
+          <a href="/privacy" class="hover:text-ink-950">Privacy</a>
         </nav>
       </div>
     </footer>
+    <!-- HalliardClick: clicks on links to halliardmedia.com (the publisher). No personal data:
+         placement comes from data-halliard-placement (or the page region), destination drops the query string. -->
+    <script is:inline>
+      (function () {
+        function onClick(e) {
+          var a = e.target && e.target.closest ? e.target.closest("a[href]") : null;
+          if (!a) return;
+          var url;
+          try { url = new URL(a.href, location.href); } catch (_) { return; }
+          if (!/(^|\.)halliardmedia\.com$/i.test(url.hostname)) return;
+          var tagged = a.closest("[data-halliard-placement]");
+          var region = a.closest("header, footer, main");
+          var placement = tagged
+            ? tagged.getAttribute("data-halliard-placement")
+            : region ? region.tagName.toLowerCase() : "body";
+          var params = {
+            placement: placement,
+            destination: url.origin + url.pathname,
+            page_path: location.pathname,
+            site: "getmediaplanningjobs",
+          };
+          if (window.fbq) window.fbq("trackCustom", "HalliardClick", params);
+          if (window.posthog && window.posthog.capture) window.posthog.capture("halliard_click", params);
+        }
+        document.addEventListener("click", onClick, true);
+        document.addEventListener("auxclick", function (e) { if (e.button === 1) onClick(e); }, true);
+      })();
+    </script>
   </body>
 </html>
 <style is:global>

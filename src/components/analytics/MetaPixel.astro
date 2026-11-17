@@ -1,0 +1,57 @@
+---
+// Meta Pixel (id 1357860072487371), shared with Halliard, the site's publisher.
+//
+// Same pixel and event taxonomy across the Halliard network sites
+// (mediaplanningtool.com, agenticadvertisingtools.com, this site).
+//
+// Placed in <head> so events fired while the page loads (ViewJob on job pages,
+// ViewContent on role/city pages and posts) queue up instead of being dropped.
+// The consent check is the Vercel Function at api/ad-consent.js. Nothing reaches Meta until
+// /api/ad-consent says this visitor may be measured: no pixel for browsers
+// sending Global Privacy Control, or for visitors in the EEA, UK or Switzerland
+// (the same rules as Halliard3). If not allowed, the queue is discarded and
+// Meta's script is never loaded.
+const PIXEL_ID = "1357860072487371";
+---
+
+<script is:inline define:vars={{ PIXEL_ID }}>
+  (function (w, d) {
+    if (w.fbq) return;
+    // Inert stand-in: records calls, sends nothing.
+    var q = [];
+    var stub = function () { q.push(arguments); };
+    w.fbq = stub;
+
+    function disable() {
+      q.length = 0;
+      w.fbq = function () {};
+    }
+
+    if (navigator.globalPrivacyControl) return disable();
+
+    // Trailing slash: vercel.json has trailingSlash: true, so the bare path 308s.
+    fetch("/api/ad-consent/", { credentials: "same-origin" })
+      .then(function (r) { return r.ok ? r.json() : { allowed: false }; })
+      .then(function (res) {
+        if (!res || !res.allowed) return disable();
+        // Meta's standard loader, then replay what was queued after init.
+        var n = (w.fbq = function () {
+          n.callMethod ? n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+        });
+        w._fbq = n;
+        n.push = n;
+        n.loaded = true;
+        n.version = "2.0";
+        n.queue = [];
+        var t = d.createElement("script");
+        t.async = true;
+        t.src = "https://connect.facebook.net/en_US/fbevents.js";
+        d.head.appendChild(t);
+        n("init", PIXEL_ID);
+        n("track", "PageView");
+        for (var i = 0; i < q.length; i++) n.apply(null, q[i]);
+        q.length = 0;
+      })
+      .catch(disable);
+  })(window, document);
+</script>
