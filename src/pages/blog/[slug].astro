@@ -104,18 +104,18 @@ const jsonLd = {
   canonical={canonical}
   jsonLd={jsonLd}
 >
-  <article class="mx-auto max-w-3xl px-6 py-10">
-    <nav class="text-sm text-ink-500" aria-label="Breadcrumb">
-      <a href="/" class="hover:text-ink-900">Home</a>
+  <article class="mx-auto max-w-[760px] px-6 pb-16 pt-10">
+    <nav class="font-mono text-[13px] text-ink-500" aria-label="Breadcrumb">
+      <a href="/" class="hover:text-ink-950">Home</a>
       <span class="mx-1.5">/</span>
-      <a href="/blog/" class="hover:text-ink-900">Editorial</a>
+      <a href="/blog/" class="hover:text-ink-950">Editorial</a>
       <span class="mx-1.5">/</span>
       <span class="text-ink-700">{d.title}</span>
     </nav>
 
-    <header class="mt-4">
-      <h1 class="text-3xl font-semibold leading-tight text-ink-900 sm:text-4xl">{d.title}</h1>
-      <p class="mt-3 text-sm text-ink-500">
+    <header class="mt-6 border-b border-ink-200 pb-8">
+      <h1 class="text-[clamp(34px,5vw,52px)] font-semibold leading-[1.04] tracking-display">{d.title}</h1>
+      <p class="mt-4 font-mono text-[13px] text-ink-500">
         {d.author} · {fmtDate(d.publishedAt)}
         {d.readingMinutes && ` · ${d.readingMinutes} min read`}
         {d.updatedAt && d.updatedAt.getTime() !== d.publishedAt.getTime() && (
@@ -129,12 +129,12 @@ const jsonLd = {
     </div>
 
     {d.faqs && d.faqs.length > 0 && (
-      <section class="mt-12 border-t border-ink-100 pt-10">
-        <h2 class="text-2xl font-semibold text-ink-900">FAQs</h2>
+      <section class="mt-12 border-t border-ink-200 pt-10">
+        <h2 class="text-[28px] font-semibold tracking-heading">FAQs</h2>
         <div class="mt-5 space-y-5">
           {d.faqs.map((f) => (
             <div>
-              <h3 class="text-base font-medium text-ink-900">{f.q}</h3>
+              <h3 class="text-[17px] font-semibold tracking-[-0.01em]">{f.q}</h3>
               <p class="mt-1 text-ink-700">{f.a}</p>
             </div>
           ))}
@@ -142,12 +142,12 @@ const jsonLd = {
       </section>
     )}
 
-    <footer class="mt-12 border-t border-ink-100 pt-8 text-sm text-ink-500">
+    <footer class="mt-12 rounded-card border border-ink-200 bg-white p-6 text-sm text-ink-600">
       <p>
         Published by Halliard Editorial. Found this useful? Browse
-        <a href="/jobs/" class="text-brand hover:underline">open media roles</a>
+        <a href="/jobs/" class="font-medium text-brand hover:text-brand-dark">open media roles</a>
         or check
-        <a href="/blog/" class="text-brand hover:underline">other career guides</a>.
+        <a href="/blog/" class="font-medium text-brand hover:text-brand-dark">other career guides</a>.
       </p>
     </footer>
   </article>
@@ -155,7 +155,7 @@ const jsonLd = {
 
 <style is:global>
   .article {
-    color: rgb(45 45 52); /* ink-700 */
+    color: #44403C;
     font-size: 1.0625rem;
     line-height: 1.75;
   }
@@ -163,14 +163,15 @@ const jsonLd = {
   .article h2 {
     font-size: 1.5rem;
     font-weight: 600;
-    color: rgb(14 14 17); /* ink-900 */
+    color: #0C0A09;
+    letter-spacing: -0.02em;
     margin-top: 2.25em;
     line-height: 1.3;
   }
   .article h3 {
     font-size: 1.2rem;
     font-weight: 600;
-    color: rgb(14 14 17);
+    color: #0C0A09;
     margin-top: 1.75em;
     line-height: 1.35;
   }
@@ -179,34 +180,34 @@ const jsonLd = {
   .article ol { list-style: decimal; }
   .article li + li { margin-top: 0.5em; }
   .article a {
-    color: #0a7b6f;
+    color: #047857;
     text-decoration: underline;
     text-decoration-thickness: 1px;
     text-underline-offset: 3px;
   }
-  .article a:hover { color: #075c54; }
-  .article strong { color: rgb(14 14 17); font-weight: 600; }
+  .article a:hover { color: #065F46; }
+  .article strong { color: #0C0A09; font-weight: 600; }
   .article blockquote {
-    border-left: 3px solid rgb(216 216 221); /* ink-200 */
+    border-left: 3px solid #D1FAE5;
     padding-left: 1rem;
-    color: rgb(91 91 103); /* ink-500 */
+    color: #57534E;
     font-style: italic;
   }
   .article code {
-    background: rgb(247 247 248); /* ink-50 */
+    background: #F5F5F4;
     padding: 0.15em 0.35em;
     border-radius: 0.25rem;
     font-size: 0.9em;
   }
   .article pre {
-    background: rgb(29 29 34); /* ink-800 */
-    color: rgb(238 238 240); /* ink-100 */
+    background: #1C1917;
+    color: #F5F5F4;
     padding: 1rem 1.25rem;
-    border-radius: 0.5rem;
+    border-radius: 10px;
     overflow-x: auto;
     font-size: 0.9em;
     line-height: 1.6;
   }
   .article pre code { background: transparent; padding: 0; }
-  .article hr { border-top: 1px solid rgb(238 238 240); margin: 2.5em 0; }
+  .article hr { border-top: 1px solid #E7E5E4; margin: 2.5em 0; }
 </style>

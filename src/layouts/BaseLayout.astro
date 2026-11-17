@@ -11,6 +11,11 @@ const {
   canonical,
   jsonLd,
 } = Astro.props;
+const path = Astro.url.pathname;
+const nav = [
+  { href: "/jobs/", label: "Jobs", active: path.startsWith("/jobs") },
+  { href: "/blog/", label: "Editorial", active: path.startsWith("/blog") },
+];
 const canonicalUrl = canonical ?? new URL(Astro.url.pathname, Astro.site).toString();
 ---
 <!doctype html>
@@ -39,7 +44,7 @@ const canonicalUrl = canonical ?? new URL(Astro.url.pathname, Astro.site).toStri
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500&display=swap"
       rel="stylesheet"
     />
     {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
@@ -54,38 +59,41 @@ const canonicalUrl = canonical ?? new URL(Astro.url.pathname, Astro.site).toStri
       });
     </script>
   </head>
-  <body class="min-h-screen bg-white text-ink-800 antialiased">
-    <header class="border-b border-ink-100 bg-white">
-      <div class="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-x-6 gap-y-3 px-6 py-4">
-        <a href="/" class="flex shrink-0 items-center gap-2.5 text-lg font-semibold text-ink-900">
-          <span class="text-brand" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="28" height="28" fill="none"><rect x="4" y="9" width="20" height="4" rx="2" fill="currentColor"/><rect x="4" y="16" width="14" height="4" rx="2" fill="currentColor"/><rect x="4" y="23" width="9" height="4" rx="2" fill="currentColor"/><circle cx="25" cy="7" r="4" fill="currentColor"/><circle cx="25" cy="7" r="1.5" fill="#ffffff"/></svg></span>
-          <span class="whitespace-nowrap">Media Planning Jobs</span>
+  <body class="min-h-screen bg-ink-50 font-sans text-ink-950 antialiased">
+    <header class="border-b border-ink-200">
+      <div class="mx-auto flex max-w-site flex-wrap items-center gap-x-6 gap-y-3 px-6 py-4">
+        <a href="/" class="flex shrink-0 items-center gap-2.5 text-ink-950 hover:text-ink-950">
+          <svg width="26" height="26" viewBox="0 0 28 28" aria-hidden="true"><rect width="28" height="28" rx="7" fill="#047857"></rect><path d="M8 18 L12.5 13.5 L15.5 16.5 L20 10" stroke="#FFFFFF" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+          <span class="whitespace-nowrap text-[17px] font-semibold tracking-[-0.02em]">Media Planning Jobs</span>
         </a>
-        <nav class="flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-ink-600">
-          <a href="/jobs" class="hover:text-ink-900">Jobs</a>
-          <a href="/blog" class="hover:text-ink-900">Editorial</a>
-          <a href="/post-a-job" class="hover:text-ink-900">Post a job</a>
-          <a href="/about" class="hover:text-ink-900">About</a>
+        <nav aria-label="Main" class="order-last -ml-3 flex w-full gap-1 text-sm sm:order-none sm:ml-0 sm:w-auto sm:flex-1">
+          {nav.map((n) => (
+            <a
+              href={n.href}
+              aria-current={n.active ? "page" : undefined}
+              class:list={[
+                "rounded-lg px-3 py-2 transition-colors",
+                n.active ? "bg-ink-100 text-ink-950" : "text-ink-600 hover:bg-ink-100 hover:text-ink-950",
+              ]}
+            >{n.label}</a>
+          ))}
         </nav>
+        <a href="/post-a-job" class="ml-auto flex h-10 items-center rounded-[10px] bg-brand px-4 text-sm font-medium text-white transition-colors hover:bg-brand-dark">Post a job</a>
       </div>
     </header>
     <main>
       <slot />
     </main>
-    <footer class="mt-24 border-t border-ink-100 bg-ink-50">
-      <div class="mx-auto max-w-6xl px-6 py-10 text-sm text-ink-500">
-        <div class="flex flex-wrap items-center justify-between gap-4">
-          <p>© {new Date().getFullYear()} Media Planning Jobs. A <a href="https://halliardmedia.com" class="text-brand hover:underline">Halliard</a> project.</p>
-          <p>
-            <a href="https://mediaplanningtool.com" class="hover:text-ink-800">mediaplanningtool.com</a>
-            ·
-            <a href="/feed.xml" class="hover:text-ink-800">RSS</a>
-            ·
-            <a href="/jobs.json" class="hover:text-ink-800">JSON feed</a>
-            ·
-            <a href="/sitemap-index.xml" class="hover:text-ink-800">Sitemap</a>
-          </p>
-        </div>
+    <footer class="mt-8 border-t border-ink-200">
+      <div class="mx-auto flex max-w-site flex-wrap justify-between gap-6 px-6 pb-16 pt-10 text-sm text-ink-600">
+        <p class="max-w-xl">© {new Date().getFullYear()} Media Planning Jobs. Roles are collected from public career pages. Employers can claim or correct a listing.</p>
+        <nav aria-label="Footer" class="flex flex-wrap gap-x-5 gap-y-2">
+          <a href="/about" class="hover:text-ink-950">About</a>
+          <a href="/post-a-job" class="hover:text-ink-950">For employers</a>
+          <a href="/feed.xml" class="hover:text-ink-950">RSS</a>
+          <a href="/jobs.json" class="hover:text-ink-950">JSON feed</a>
+          <a href="/sitemap-index.xml" class="hover:text-ink-950">Sitemap</a>
+        </nav>
       </div>
     </footer>
   </body>
@@ -94,5 +102,6 @@ const canonicalUrl = canonical ?? new URL(Astro.url.pathname, Astro.site).toStri
   :root {
     color-scheme: light;
   }
-  html { font-family: 'Inter', system-ui, sans-serif; }
+  html { font-family: 'Geist', system-ui, sans-serif; }
+  h1, h2, h3 { text-wrap: balance; }
 </style>

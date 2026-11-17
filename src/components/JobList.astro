@@ -1,0 +1,10 @@
+---
+// Hairline card that holds JobCard rows. The -mb-px hides the last row's divider.
+interface Props { id?: string }
+const { id } = Astro.props;
+---
+<div class="overflow-hidden rounded-card border border-ink-200 bg-white">
+  <div id={id} class="-mb-px">
+    <slot />
+  </div>
+</div>
