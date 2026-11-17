@@ -21,6 +21,14 @@ const fmtDate = (date: Date) =>
   date.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
 
 const canonical = new URL(Astro.url.pathname, Astro.site).toString();
+
+// ViewContent (Meta). Post attributes only, no personal data.
+const viewContent = {
+  content_name: d.title,
+  content_category: "career_guide",
+  content_type: "career_guide",
+  site: "getmediaplanningjobs",
+};
 const SITE_ORG_ID = "https://getmediaplanningjobs.com/#organization";
 const PUBLISHER_ID = "https://halliardmedia.com/#organization";
 
@@ -104,6 +112,9 @@ const jsonLd = {
   canonical={canonical}
   jsonLd={jsonLd}
 >
+  <script is:inline define:vars={{ viewContent }}>
+    if (window.fbq) window.fbq("track", "ViewContent", viewContent);
+  </script>
   <article class="mx-auto max-w-[760px] px-6 pb-16 pt-10">
     <nav class="font-mono text-[13px] text-ink-500" aria-label="Breadcrumb">
       <a href="/" class="hover:text-ink-950">Home</a>
