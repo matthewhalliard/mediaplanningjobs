@@ -107,6 +107,77 @@ export function slugFor(title, company) {
     .replace(/-+$/, "");
 }
 
+// ---------- salary from description ----------
+
+// Adzuna only returns a salary when the listing has one in a field it parses.
+// Many employers put the range in the description instead ("$130,800 - $217,800
+// Annually"). Google Jobs flags postings without baseSalary, so read an annual
+// figure from the text when it is stated plainly. Hourly rates, budgets and
+// revenue figures are skipped: an amount must look like an annual salary
+// ($20K-$1M) and sit in a range or after a word like "salary".
+const AMOUNT = String.raw`\$\s?(\d{1,3}(?:,\d{3})+(?:\.\d{2})?|\d{2,3}(?:\.\d+)?\s?[kK]\b)`;
+const toDollars = (s) => {
+  const t = s.replace(/[\s,$]/g, "");
+  return /k$/i.test(t) ? Math.round(parseFloat(t) * 1000) : Math.round(parseFloat(t));
+};
+const annual = (n) => n >= 20000 && n <= 1000000;
+const HOURLY = /^\s*(?:\/\s*h(?:ou)?r|per\s+hour|an\s+hour|hourly)/i;
+
+export function salaryFromText(text) {
+  const s = String(text ?? "").replace(/\\n/g, " ").replace(/\s+/g, " ");
+  const range = new RegExp(`${AMOUNT}\\s*(?:-|–|—|to)\\s*${AMOUNT}`, "g");
+  for (const m of s.matchAll(range)) {
+    // An hourly range means the pay isn't annual; don't fall back to one figure.
+    if (HOURLY.test(s.slice(m.index + m[0].length, m.index + m[0].length + 15))) return {};
+    const min = toDollars(m[1]);
+    const max = toDollars(m[2]);
+    if (annual(min) && annual(max) && min <= max) return { salaryMin: min, salaryMax: max };
+  }
+  const labelled = new RegExp(
+    `\\b(?:salary|compensation|base pay|pay range|pay)\\b[^$.]{0,30}?(starting at|from|minimum of|up to)?\\s*${AMOUNT}`,
+    "i"
+  );
+  const m = s.match(labelled);
+  if (m && !HOURLY.test(s.slice(m.index + m[0].length, m.index + m[0].length + 15))) {
+    const n = toDollars(m[2]);
+    if (annual(n)) {
+      const word = (m[1] ?? "").toLowerCase();
+      if (word === "up to") return { salaryMax: n };
+      if (word) return { salaryMin: n };
+      return { salaryMin: n, salaryMax: n };
+    }
+  }
+  return {};
+}
+
+// ---------- duplicates ----------
+
+// Adzuna often carries the same role twice, from different boards, under
+// slightly different company names ("NBC Universal" / "NBCUniversal",
+// "P&G" / "Procter & Gamble"). Two listings are the same job when the titles
+// match and either the companies match once normalised or the descriptions
+// share a long run of text.
+const norm = (s) => String(s ?? "").toLowerCase().replace(/[^a-z0-9]/g, "");
+const companyKey = (s) =>
+  norm(String(s ?? "").replace(/\b(corporation|corp|inc|llc|ltd|co|company|the)\b\.?/gi, ""));
+const COMPANY_ALIASES = { pg: "proctergamble" };
+const canonicalCompany = (s) => COMPANY_ALIASES[companyKey(s)] ?? companyKey(s);
+
+function sharesText(a, b) {
+  const x = norm(a);
+  const y = norm(b);
+  const [short, long] = x.length <= y.length ? [x, y] : [y, x];
+  if (short.length < 300) return false;
+  // A 200-character run from the middle of the shorter description.
+  const mid = Math.floor(short.length / 2) - 100;
+  return long.includes(short.slice(mid, mid + 200));
+}
+
+export function isSameJob(a, b) {
+  if (norm(a.title) !== norm(b.title)) return false;
+  return canonicalCompany(a.company) === canonicalCompany(b.company) || sharesText(a.description, b.description);
+}
+
 const yaml = (s) => JSON.stringify(String(s));
 // Descriptions go into MDX, where braces and angle brackets are code.
 const mdxSafe = (s) =>
@@ -180,6 +251,10 @@ function fromAdzuna(r) {
     : r.contract_type === "contract" ? "CONTRACTOR"
     : r.contract_time === "part_time" ? "PART_TIME"
     : "FULL_TIME";
+  const published =
+    !predicted && (r.salary_min || r.salary_max)
+      ? { salaryMin: r.salary_min ? Math.round(r.salary_min) : undefined, salaryMax: r.salary_max ? Math.round(r.salary_max) : undefined }
+      : salaryFromText(description);
   return {
     slug: slugFor(title, company),
     title,
@@ -188,9 +263,10 @@ function fromAdzuna(r) {
     remote: classifyRemote(title, location, description),
     function: fn,
     level: classifyLevel(title),
-    // Only show salaries the employer published, not Adzuna's estimates.
-    salaryMin: !predicted && r.salary_min ? Math.round(r.salary_min) : undefined,
-    salaryMax: !predicted && r.salary_max ? Math.round(r.salary_max) : undefined,
+    // Only show salaries the employer published (in Adzuna's salary fields or
+    // in the description), never Adzuna's estimates.
+    salaryMin: published.salaryMin,
+    salaryMax: published.salaryMax,
     employmentType,
     postedAt: String(r.created).slice(0, 10),
     applyUrl: r.redirect_url,
@@ -200,14 +276,16 @@ function fromAdzuna(r) {
 
 async function importJobs(existing) {
   const seen = new Set(existing);
+  const kept = existing.map((slug) => listing(path.join(JOBS_DIR, `${slug}.mdx`)));
   const byFunction = new Map();
   for (const what of SEARCHES) {
     for (const page of [1, 2]) {
       const results = await adzunaSearch(what, page);
       for (const r of results) {
         const job = fromAdzuna(r);
-        if (!job || seen.has(job.slug)) continue;
+        if (!job || seen.has(job.slug) || kept.some((k) => isSameJob(k, job))) continue;
         seen.add(job.slug);
+        kept.push(job);
         if (!byFunction.has(job.function)) byFunction.set(job.function, []);
         byFunction.get(job.function).push(job);
       }
@@ -236,6 +314,14 @@ function frontmatter(file) {
   const fm = text.split("---")[1] ?? "";
   const get = (k) => (fm.match(new RegExp(`^${k}:\\s*"?([^"\\n]*)"?`, "m")) ?? [])[1];
   return { postedAt: get("postedAt"), applyUrl: get("applyUrl") };
+}
+
+/** Title, company and description of a saved listing, for duplicate checks. */
+function listing(file) {
+  const text = fs.readFileSync(file, "utf8");
+  const [, fm = "", ...rest] = text.split("---");
+  const get = (k) => (fm.match(new RegExp(`^${k}:\\s*"?([^"\\n]*)"?`, "m")) ?? [])[1];
+  return { title: get("title"), company: get("company"), description: rest.join("---") };
 }
 
 async function linkIsGone(url) {

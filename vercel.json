@@ -12,6 +12,21 @@
       ],
       "destination": "https://getmediaplanningjobs.com/$1",
       "permanent": true
+    },
+    {
+      "source": "/jobs/campaign-manager---programmatic-ad-operations-nbc-universal/",
+      "destination": "/jobs/campaign-manager---programmatic-ad-operations-nbcuniversal/",
+      "permanent": true
+    },
+    {
+      "source": "/jobs/media-analyst-chenega-mios/",
+      "destination": "/jobs/media-analyst-chenega-corporation/",
+      "permanent": true
+    },
+    {
+      "source": "/jobs/senior-digital-media-trader-procter--gamble/",
+      "destination": "/jobs/senior-digital-media-trader-pg/",
+      "permanent": true
     }
   ]
 }
